@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manajemen Data Barang</h2>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Tambah Barang Baru</h5>
+            <form action="{{ url_for('data_barang') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Nama Barang</label>
+                    <input type="text" name="nama" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Harga (Rp)</label>
+                    <input type="number" name="harga" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Stok</label>
+                    <input type="number" name="stok" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan Barang</button>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nama Barang</th>
+                <th>Harga</th>
+                <th>Stok</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in barang_list %}
+            <tr>
+                <td>{{ b.id }}</td>
+                <td>{{ b.nama }}</td>
+                <td>Rp {{ "{:,}".format(b.harga) }}</td>
+                <td>{{ b.stok }}</td>
+                <td>
+                    <a href="{{ url_for('edit_barang', id=b.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{{ url_for('hapus_barang', id=b.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">Hapus</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center">Belum ada data barang.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
