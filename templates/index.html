@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Beranda - Website Flask{% endblock %}
+
+{% block content %}
+<span class="badge">Flask + SQLite Database</span>
+
+<h1>Daftar Pengunjung</h1>
+<p>Masukkan nama kamu untuk tersimpan di database:</p>
+
+<form action="/" method="POST" class="input-form">
+    <input type="text" name="nama" placeholder="Ketik nama di sini..." required autocomplete="off">
+    <button type="submit">Tambah Pengunjung</button>
+</form>
+
+<hr class="divider">
+
+<div class="list-container">
+    <h3>Siapa saja yang sudah berkunjung:</h3>
+    {% if daftar_pengunjung %}
+        <ul class="user-list">
+            {% for p in daftar_pengunjung %}
+                <li>
+                    <span>👤 {{ p.nama }}</span>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('edit', id=p.id) }}" class="btn-edit">Edit</a>
+                        <a href="{{ url_for('delete', id=p.id) }}" class="btn-delete" onclick="return confirm('Yakin ingin menghapus nama ini?')">Hapus</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty-text">Belum ada data di database.</p>
+    {% endif %}
+</div>
+{% endblock %}

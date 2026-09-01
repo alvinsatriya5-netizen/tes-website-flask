@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Data - Website Flask{% endblock %}
+
+{% block content %}
+<span class="badge">Edit Data</span>
+<h1>Edit Nama Pengunjung</h1>
+<p>Ubah nama di bawah ini lalu simpan perubahan:</p>
+
+<form action="{{ url_for('edit', id=pengunjung.id) }}" method="POST" class="input-form">
+    <input type="text" name="nama" value="{{ pengunjung.nama }}" required autocomplete="off">
+    <button type="submit">Simpan Perubahan</button>
+    <a href="{{ url_for('home') }}" class="btn-cancel">Batal</a>
+</form>
+{% endblock %}
