@@ -81,4 +81,38 @@
         {% endfor %}
     </tbody>
 </table>
+
+<!-- Tabel Riwayat Transaksi Barang -->
+<h3 style="margin-top: 30px; margin-bottom: 10px; font-size: 18px; text-align: left;">Riwayat Transaksi Masuk / Keluar</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Waktu</th>
+            <th>Nama Barang</th>
+            <th>Tipe</th>
+            <th>Jumlah</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in riwayat_list %}
+        <tr>
+            <td>{{ r.tanggal.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ r.barang.nama }}</td>
+            <td>
+                {% if r.tipe == 'Masuk' %}
+                    <span style="color: #28a745; font-weight: bold;">+ Masuk</span>
+                {% else %}
+                    <span style="color: #dc3545; font-weight: bold;">- Keluar</span>
+                {% endif %}
+            </td>
+            <td><strong>{{ r.jumlah }}</strong> unit</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4" style="text-align: center; color: #777;">Belum ada riwayat transaksi.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

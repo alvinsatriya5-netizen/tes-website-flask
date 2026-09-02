@@ -27,7 +27,7 @@ class Barang(db.Model):
     def __repr__(self):
         return f'<Barang {self.nama}>'
 
-# Model baru untuk Riwayat Transaksi (Masuk/Keluar)
+# Model untuk Riwayat Transaksi (Masuk/Keluar)
 class RiwayatTransaksi(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     barang_id = db.Column(db.Integer, db.ForeignKey('barang.id'), nullable=False)
@@ -77,7 +77,7 @@ def delete(id):
     return redirect(url_for('home'))
 
 # ================= RUTE BARANG (CRUD & TRANSAKSI) =================
-# 1. Tampil & Tambah Barang
+# 1. Tampil & Tambah Barang (Terupdate dengan Riwayat)
 @app.route('/barang', methods=['GET', 'POST'])
 def data_barang():
     if request.method == 'POST':
@@ -93,9 +93,12 @@ def data_barang():
             return redirect(url_for('data_barang'))
 
     semua_barang = Barang.query.all()
-    return render_template('barang.html', barang_list=semua_barang)
+    # Query riwayat transaksi, diurutkan dari yang paling baru
+    riwayat_list = RiwayatTransaksi.query.order_by(RiwayatTransaksi.tanggal.desc()).all()
 
-# 2. Rute Transaksi Barang (Masuk / Keluar) -> Otomatis ubah stok
+    return render_template('barang.html', barang_list=semua_barang, riwayat_list=riwayat_list)
+
+# 2. Rute Transaksi Barang (Masuk / Keluar) -> Otomatis ubah stok & catat log
 @app.route('/barang/transaksi', methods=['POST'])
 def transaksi_barang():
     barang_id = request.form.get('barang_id')
