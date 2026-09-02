@@ -18,9 +18,10 @@
     </div>
     <div class="form-group">
         <label>Stok Awal</label>
-        <input type="number" name="stok" placeholder="Contoh: 10" required>
+        <!-- Ditambahkan step="any" dan min="0" agar bisa diisi angka desimal -->
+        <input type="number" step="any" min="0" name="stok" placeholder="Contoh: 10.5" required>
     </div>
-    <!-- Input Satuan Baru (Sudah ditambahkan lembar, rim, lusin, botol) -->
+    <!-- Input Satuan Baru -->
     <div class="form-group">
         <label>Satuan</label>
         <select name="satuan" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
@@ -63,7 +64,8 @@
     </div>
     <div class="form-group">
         <label>Jumlah</label>
-        <input type="number" name="jumlah" min="1" placeholder="Contoh: 5" required>
+        <!-- Ditambahkan step="any" dan min="0.01" agar transaksi desimal diizinkan -->
+        <input type="number" step="any" min="0.01" name="jumlah" placeholder="Contoh: 2.5" required>
     </div>
     <button type="submit" class="btn btn-primary" style="background-color: #28a745;">Proses Transaksi</button>
 </form>

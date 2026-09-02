@@ -16,7 +16,17 @@
     </div>
     <div class="form-group">
         <label>Stok</label>
-        <input type="number" name="stok" value="{{ barang.stok }}" required>
+        <!-- Ditambahkan step="any" dan min="0" agar mengizinkan angka desimal -->
+        <input type="number" step="any" min="0" name="stok" value="{{ barang.stok }}" required>
+    </div>
+    <div class="form-group">
+        <label>Satuan</label>
+        <select name="satuan" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
+            {% set opsi_satuan = ['pcs', 'buah', 'lembar', 'rim', 'lusin', 'botol', 'kg', 'gram', 'liter', 'ml', 'pack', 'dus', 'unit'] %}
+            {% for s in opsi_satuan %}
+                <option value="{{ s }}" {% if barang.satuan == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
     </div>
     <button type="submit" class="btn btn-primary">Update Barang</button>
     <a href="{{ url_for('data_barang') }}" class="btn btn-secondary">Batal</a>

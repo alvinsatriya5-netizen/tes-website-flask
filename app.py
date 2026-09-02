@@ -34,7 +34,8 @@ class Barang(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nama = db.Column(db.String(100), nullable=False)
     harga = db.Column(db.Integer, nullable=False)
-    stok = db.Column(db.Integer, nullable=False)
+    # Ubah menjadi Float agar bisa desimal
+    stok = db.Column(db.Float, nullable=False, default=0.0)
     satuan = db.Column(db.String(50), nullable=False, default='pcs')
 
     def __repr__(self):
@@ -44,7 +45,8 @@ class RiwayatTransaksi(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     barang_id = db.Column(db.Integer, db.ForeignKey('barang.id'), nullable=False)
     tipe = db.Column(db.String(20), nullable=False)
-    jumlah = db.Column(db.Integer, nullable=False)
+    # Ubah menjadi Float agar bisa desimal
+    jumlah = db.Column(db.Float, nullable=False)
     tanggal = db.Column(db.DateTime, default=waktu_wib)
     
     barang = db.relationship('Barang', backref=db.backref('riwayat', lazy=True))
@@ -100,7 +102,8 @@ def data_barang():
         satuan = request.form.get('satuan', 'pcs')
 
         if nama and harga and stok and satuan:
-            barang_baru = Barang(nama=nama, harga=int(harga), stok=int(stok), satuan=satuan)
+            # Gunakan float(stok) agar menerima desimal
+            barang_baru = Barang(nama=nama, harga=int(harga), stok=float(stok), satuan=satuan)
             db.session.add(barang_baru)
             db.session.commit()
             flash('Barang berhasil ditambahkan!', 'success')
@@ -118,7 +121,8 @@ def transaksi_barang():
     jumlah_input = request.form.get('jumlah')
 
     if barang_id and tipe and jumlah_input:
-        jumlah = int(jumlah_input)
+        # Gunakan float(jumlah_input) agar menerima desimal
+        jumlah = float(jumlah_input)
         item = Barang.query.get_or_404(int(barang_id))
 
         if tipe == 'Masuk':
@@ -144,7 +148,8 @@ def edit_barang(id):
     if request.method == 'POST':
         item.nama = request.form.get('nama')
         item.harga = int(request.form.get('harga'))
-        item.stok = int(request.form.get('stok'))
+        # Gunakan float() untuk stok di rute edit
+        item.stok = float(request.form.get('stok'))
         item.satuan = request.form.get('satuan')
         db.session.commit()
         flash('Data barang berhasil diperbarui!', 'info')
