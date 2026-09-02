@@ -6,7 +6,9 @@
 <span class="badge">Flask + SQLite Database</span>
 
 <h1>Daftar Pengunjung</h1>
-<p>Website ini dibuat sebagai sarana <strong>Rekap Stok Barang, Keluar dan Masuk Barang</strong> untuk menertibkan ketersediaan barang yang ada.</p>
+<p class="description-text" style="color: #6c757d; margin-top: 10px; margin-bottom: 20px;">
+    Website ini dibuat sebagai sarana <strong>Rekap Stok Barang, Keluar dan Masuk Barang</strong> untuk menertibkan ketersediaan barang yang ada.
+</p>
 
 <form action="/" method="POST" class="input-form">
     <input type="text" name="nama" placeholder="Ketik nama di sini..." required autocomplete="off">
@@ -24,7 +26,7 @@
                     <span>👤 {{ p.nama }}</span>
                     <div class="action-buttons">
                         <a href="{{ url_for('edit', id=p.id) }}" class="btn-edit">Edit</a>
-                        <a href="{{ url_for('delete', id=p.id) }}" class="btn-delete" onclick="return confirm('Yakin ingin menghapus nama ini?')">Hapus</a>
+                        <a href="{{ url_for('delete', id=p.id) }}" class="btn-delete" onclick="return confirm('Yakin ingin menghapus nama me ini?')">Hapus</a>
                     </div>
                 </li>
             {% endfor %}
