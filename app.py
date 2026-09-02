@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
@@ -12,6 +12,12 @@ app.secret_key = os.environ.get('SECRET_KEY', 'rahasia_super_aman')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+# ================= HELPER WAKTU WIB (GMT+7) =================
+WIB = timezone(timedelta(hours=7))
+
+def waktu_wib():
+    return datetime.now(WIB)
 
 # ================= DATABASE MODELS =================
 class Pengunjung(db.Model):
@@ -33,7 +39,7 @@ class RiwayatTransaksi(db.Model):
     barang_id = db.Column(db.Integer, db.ForeignKey('barang.id'), nullable=False)
     tipe = db.Column(db.String(20), nullable=False)  # 'Masuk' atau 'Keluar'
     jumlah = db.Column(db.Integer, nullable=False)
-    tanggal = db.Column(db.DateTime, default=datetime.utcnow)
+    tanggal = db.Column(db.DateTime, default=waktu_wib)  # Menggunakan waktu WIB (GMT+7)
     
     # Relasi ke model Barang
     barang = db.relationship('Barang', backref=db.backref('riwayat', lazy=True))
@@ -98,7 +104,7 @@ def data_barang():
 
     return render_template('barang.html', barang_list=semua_barang, riwayat_list=riwayat_list)
 
-# 2. Rute Transaksi Barang (Masuk / Keluar) -> Otomatis ubah stok & catat log
+# 2. Rute Transaksi Barang (Masuk / Keluar) -> Otomatis ubah stok & catat log WIB
 @app.route('/barang/transaksi', methods=['POST'])
 def transaksi_barang():
     barang_id = request.form.get('barang_id')
@@ -120,7 +126,7 @@ def transaksi_barang():
                 flash(f'Gagal! Stok {item.nama} tidak mencukupi (Tersisa: {item.stok}).', 'danger')
                 return redirect(url_for('data_barang'))
 
-        # Simpan log ke tabel riwayat transaksi
+        # Simpan log ke tabel riwayat transaksi (otomatis memanggil fungsi waktu_wib)
         log = RiwayatTransaksi(barang_id=item.id, tipe=tipe, jumlah=jumlah)
         db.session.add(log)
         db.session.commit()
