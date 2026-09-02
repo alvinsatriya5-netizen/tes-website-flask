@@ -145,13 +145,17 @@ def edit_barang(id):
 
     return render_template('edit_barang.html', barang=item)
 
-# 4. Hapus Barang
+# 4. Hapus Barang (DIPERBAIKI: Menghapus riwayat transaksi terkait terlebih dahulu)
 @app.route('/barang/hapus/<int:id>')
 def hapus_barang(id):
     item = Barang.query.get_or_404(id)
+    
+    # Clean up riwayat transaksi yang terhubung sebelum menghapus barang
+    RiwayatTransaksi.query.filter_by(barang_id=item.id).delete()
+    
     db.session.delete(item)
     db.session.commit()
-    flash('Barang berhasil dihapus!', 'danger')
+    flash('Barang dan riwayat transaksinya berhasil dihapus!', 'danger')
     return redirect(url_for('data_barang'))
 
 # ================= RUTE UTILITAS =================
