@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
@@ -17,7 +18,6 @@ class Pengunjung(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nama = db.Column(db.String(100), nullable=False)
 
-# Model baru untuk Database Barang
 class Barang(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nama = db.Column(db.String(100), nullable=False)
@@ -26,6 +26,17 @@ class Barang(db.Model):
 
     def __repr__(self):
         return f'<Barang {self.nama}>'
+
+# Model baru untuk Riwayat Transaksi (Masuk/Keluar)
+class RiwayatTransaksi(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    barang_id = db.Column(db.Integer, db.ForeignKey('barang.id'), nullable=False)
+    tipe = db.Column(db.String(20), nullable=False)  # 'Masuk' atau 'Keluar'
+    jumlah = db.Column(db.Integer, nullable=False)
+    tanggal = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relasi ke model Barang
+    barang = db.relationship('Barang', backref=db.backref('riwayat', lazy=True))
 
 # Buat database & tabel secara otomatis saat aplikasi dimulai
 with app.app_context():
@@ -65,7 +76,7 @@ def delete(id):
     flash('Data pengunjung berhasil dihapus!', 'danger')
     return redirect(url_for('home'))
 
-# ================= RUTE BARANG (CRUD BARU) =================
+# ================= RUTE BARANG (CRUD & TRANSAKSI) =================
 # 1. Tampil & Tambah Barang
 @app.route('/barang', methods=['GET', 'POST'])
 def data_barang():
@@ -84,7 +95,36 @@ def data_barang():
     semua_barang = Barang.query.all()
     return render_template('barang.html', barang_list=semua_barang)
 
-# 2. Edit Barang
+# 2. Rute Transaksi Barang (Masuk / Keluar) -> Otomatis ubah stok
+@app.route('/barang/transaksi', methods=['POST'])
+def transaksi_barang():
+    barang_id = request.form.get('barang_id')
+    tipe = request.form.get('tipe')
+    jumlah_input = request.form.get('jumlah')
+
+    if barang_id and tipe and jumlah_input:
+        jumlah = int(jumlah_input)
+        item = Barang.query.get_or_404(int(barang_id))
+
+        if tipe == 'Masuk':
+            item.stok += jumlah
+            flash(f'Stok {item.nama} berhasil ditambah {jumlah} unit!', 'success')
+        elif tipe == 'Keluar':
+            if item.stok >= jumlah:
+                item.stok -= jumlah
+                flash(f'Stok {item.nama} berhasil dikurangi {jumlah} unit!', 'info')
+            else:
+                flash(f'Gagal! Stok {item.nama} tidak mencukupi (Tersisa: {item.stok}).', 'danger')
+                return redirect(url_for('data_barang'))
+
+        # Simpan log ke tabel riwayat transaksi
+        log = RiwayatTransaksi(barang_id=item.id, tipe=tipe, jumlah=jumlah)
+        db.session.add(log)
+        db.session.commit()
+
+    return redirect(url_for('data_barang'))
+
+# 3. Edit Barang
 @app.route('/barang/edit/<int:id>', methods=['GET', 'POST'])
 def edit_barang(id):
     item = Barang.query.get_or_404(id)
@@ -98,7 +138,7 @@ def edit_barang(id):
 
     return render_template('edit_barang.html', barang=item)
 
-# 3. Hapus Barang
+# 4. Hapus Barang
 @app.route('/barang/hapus/<int:id>')
 def hapus_barang(id):
     item = Barang.query.get_or_404(id)
@@ -113,7 +153,6 @@ def about():
     return render_template('about.html')
 
 if __name__ == '__main__':
-    # Konfigurasi Port & Host dinamis untuk server production
     port = int(os.environ.get('PORT', 5000))
     debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() in ['true', '1']
     app.run(host='0.0.0.0', port=port, debug=debug_mode)
