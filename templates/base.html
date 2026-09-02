@@ -14,7 +14,8 @@
             <a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">Tentang</a>
         </nav>
 
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Arsenal Logo" class="profile-img" width="100">
+        <!-- Ditambahkan ?v=1.1 untuk membuang cache gambar lama -->
+        <img src="{{ url_for('static', filename='logo2.png') }}?v=1.1" alt="Logo Barang" class="profile-img" width="100">
         <br>
 
         <!-- Blok Flash Messages -->

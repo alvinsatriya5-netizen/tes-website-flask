@@ -27,6 +27,7 @@ class Barang(db.Model):
     nama = db.Column(db.String(100), nullable=False)
     harga = db.Column(db.Integer, nullable=False)
     stok = db.Column(db.Integer, nullable=False)
+    satuan = db.Column(db.String(50), nullable=False, default='pcs')  # Kolom baru untuk jenis satuan
 
     def __repr__(self):
         return f'<Barang {self.nama}>'
@@ -81,28 +82,28 @@ def delete(id):
     return redirect(url_for('home'))
 
 # ================= RUTE BARANG (CRUD & TRANSAKSI) =================
-# 1. Tampil & Tambah Barang (Terupdate dengan Riwayat)
+# 1. Tampil & Tambah Barang (Ditambahkan Satuan)
 @app.route('/barang', methods=['GET', 'POST'])
 def data_barang():
     if request.method == 'POST':
         nama = request.form.get('nama')
         harga = request.form.get('harga')
         stok = request.form.get('stok')
+        satuan = request.form.get('satuan', 'pcs')  # Tangkap inputan satuan (default: pcs)
 
-        if nama and harga and stok:
-            barang_baru = Barang(nama=nama, harga=int(harga), stok=int(stok))
+        if nama and harga and stok and satuan:
+            barang_baru = Barang(nama=nama, harga=int(harga), stok=int(stok), satuan=satuan)
             db.session.add(barang_baru)
             db.session.commit()
             flash('Barang berhasil ditambahkan!', 'success')
             return redirect(url_for('data_barang'))
 
     semua_barang = Barang.query.all()
-    # Query riwayat transaksi, diurutkan dari yang paling baru
     riwayat_list = RiwayatTransaksi.query.order_by(RiwayatTransaksi.tanggal.desc()).all()
 
     return render_template('barang.html', barang_list=semua_barang, riwayat_list=riwayat_list)
 
-# 2. Rute Transaksi Barang (Masuk / Keluar) -> Otomatis ubah stok & catat log WIB
+# 2. Rute Transaksi Barang (Menampilkan teks satuan pada flash message)
 @app.route('/barang/transaksi', methods=['POST'])
 def transaksi_barang():
     barang_id = request.form.get('barang_id')
@@ -115,23 +116,22 @@ def transaksi_barang():
 
         if tipe == 'Masuk':
             item.stok += jumlah
-            flash(f'Stok {item.nama} berhasil ditambah {jumlah} unit!', 'success')
+            flash(f'Stok {item.nama} berhasil ditambah {jumlah} {item.satuan}!', 'success')
         elif tipe == 'Keluar':
             if item.stok >= jumlah:
                 item.stok -= jumlah
-                flash(f'Stok {item.nama} berhasil dikurangi {jumlah} unit!', 'info')
+                flash(f'Stok {item.nama} berhasil dikurangi {jumlah} {item.satuan}!', 'info')
             else:
-                flash(f'Gagal! Stok {item.nama} tidak mencukupi (Tersisa: {item.stok}).', 'danger')
+                flash(f'Gagal! Stok {item.nama} tidak mencukupi (Tersisa: {item.stok} {item.satuan}).', 'danger')
                 return redirect(url_for('data_barang'))
 
-        # Simpan log ke tabel riwayat transaksi (otomatis memanggil fungsi waktu_wib)
         log = RiwayatTransaksi(barang_id=item.id, tipe=tipe, jumlah=jumlah)
         db.session.add(log)
         db.session.commit()
 
     return redirect(url_for('data_barang'))
 
-# 3. Edit Barang
+# 3. Edit Barang (Dapat mengedit nama, harga, stok, dan satuan)
 @app.route('/barang/edit/<int:id>', methods=['GET', 'POST'])
 def edit_barang(id):
     item = Barang.query.get_or_404(id)
@@ -139,18 +139,18 @@ def edit_barang(id):
         item.nama = request.form.get('nama')
         item.harga = int(request.form.get('harga'))
         item.stok = int(request.form.get('stok'))
+        item.satuan = request.form.get('satuan')
         db.session.commit()
         flash('Data barang berhasil diperbarui!', 'info')
         return redirect(url_for('data_barang'))
 
     return render_template('edit_barang.html', barang=item)
 
-# 4. Hapus Barang (DIPERBAIKI: Menghapus riwayat transaksi terkait terlebih dahulu)
+# 4. Hapus Barang
 @app.route('/barang/hapus/<int:id>')
 def hapus_barang(id):
     item = Barang.query.get_or_404(id)
     
-    # Clean up riwayat transaksi yang terhubung sebelum menghapus barang
     RiwayatTransaksi.query.filter_by(barang_id=item.id).delete()
     
     db.session.delete(item)
