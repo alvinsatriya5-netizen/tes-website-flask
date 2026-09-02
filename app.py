@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
@@ -14,10 +14,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # ================= HELPER WAKTU WIB (GMT+7) =================
-WIB = timezone(timedelta(hours=7))
-
 def waktu_wib():
-    return datetime.now(WIB)
+    return datetime.utcnow() + timedelta(hours=7)
 
 # ================= DATABASE MODELS =================
 class Pengunjung(db.Model):
