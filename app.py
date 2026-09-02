@@ -8,9 +8,17 @@ app = Flask(__name__)
 # Mengambil secret_key dari environment variable hosting, atau fallback ke default saat lokal
 app.secret_key = os.environ.get('SECRET_KEY', 'rahasia_super_aman')
 
-# Konfigurasi database SQLite
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+# ================= KONFIGURASI DATABASE VERCEL POSTGRES / SQLITE =================
+db_url = os.environ.get('POSTGRES_URL') or os.environ.get('STORAGE_URL') or os.environ.get('DATABASE_URL')
+
+# Perbaikan format URI dari postgres:// ke postgresql:// (wajib untuk SQLAlchemy & Vercel)
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+# Gunakan Vercel Postgres jika ada, jika tidak ada (lokal) fallback ke SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
 # ================= HELPER WAKTU WIB (GMT+7) =================
@@ -27,25 +35,26 @@ class Barang(db.Model):
     nama = db.Column(db.String(100), nullable=False)
     harga = db.Column(db.Integer, nullable=False)
     stok = db.Column(db.Integer, nullable=False)
-    satuan = db.Column(db.String(50), nullable=False, default='pcs')  # Kolom baru untuk jenis satuan
+    satuan = db.Column(db.String(50), nullable=False, default='pcs')
 
     def __repr__(self):
         return f'<Barang {self.nama}>'
 
-# Model untuk Riwayat Transaksi (Masuk/Keluar)
 class RiwayatTransaksi(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     barang_id = db.Column(db.Integer, db.ForeignKey('barang.id'), nullable=False)
-    tipe = db.Column(db.String(20), nullable=False)  # 'Masuk' atau 'Keluar'
+    tipe = db.Column(db.String(20), nullable=False)
     jumlah = db.Column(db.Integer, nullable=False)
-    tanggal = db.Column(db.DateTime, default=waktu_wib)  # Menggunakan waktu WIB (GMT+7)
+    tanggal = db.Column(db.DateTime, default=waktu_wib)
     
-    # Relasi ke model Barang
     barang = db.relationship('Barang', backref=db.backref('riwayat', lazy=True))
 
 # Buat database & tabel secara otomatis saat aplikasi dimulai
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        print("Log DB Create Error:", e)
 
 # ================= RUTE PENGUNJUNG =================
 @app.route('/', methods=['GET', 'POST'])
@@ -82,14 +91,13 @@ def delete(id):
     return redirect(url_for('home'))
 
 # ================= RUTE BARANG (CRUD & TRANSAKSI) =================
-# 1. Tampil & Tambah Barang (Ditambahkan Satuan)
 @app.route('/barang', methods=['GET', 'POST'])
 def data_barang():
     if request.method == 'POST':
         nama = request.form.get('nama')
         harga = request.form.get('harga')
         stok = request.form.get('stok')
-        satuan = request.form.get('satuan', 'pcs')  # Tangkap inputan satuan (default: pcs)
+        satuan = request.form.get('satuan', 'pcs')
 
         if nama and harga and stok and satuan:
             barang_baru = Barang(nama=nama, harga=int(harga), stok=int(stok), satuan=satuan)
@@ -103,7 +111,6 @@ def data_barang():
 
     return render_template('barang.html', barang_list=semua_barang, riwayat_list=riwayat_list)
 
-# 2. Rute Transaksi Barang (Menampilkan teks satuan pada flash message)
 @app.route('/barang/transaksi', methods=['POST'])
 def transaksi_barang():
     barang_id = request.form.get('barang_id')
@@ -131,7 +138,6 @@ def transaksi_barang():
 
     return redirect(url_for('data_barang'))
 
-# 3. Edit Barang (Dapat mengedit nama, harga, stok, dan satuan)
 @app.route('/barang/edit/<int:id>', methods=['GET', 'POST'])
 def edit_barang(id):
     item = Barang.query.get_or_404(id)
@@ -146,13 +152,10 @@ def edit_barang(id):
 
     return render_template('edit_barang.html', barang=item)
 
-# 4. Hapus Barang
 @app.route('/barang/hapus/<int:id>')
 def hapus_barang(id):
     item = Barang.query.get_or_404(id)
-    
     RiwayatTransaksi.query.filter_by(barang_id=item.id).delete()
-    
     db.session.delete(item)
     db.session.commit()
     flash('Barang dan riwayat transaksinya berhasil dihapus!', 'danger')
