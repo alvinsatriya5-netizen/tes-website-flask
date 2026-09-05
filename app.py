@@ -247,8 +247,9 @@ def data_barang():
 
     semua_barang = Barang.query.all()
     riwayat_list = RiwayatTransaksi.query.order_by(RiwayatTransaksi.tanggal.desc()).all()
+    today_date = waktu_wib().strftime('%Y-%m-%d')
 
-    return render_template('barang.html', barang_list=semua_barang, riwayat_list=riwayat_list)
+    return render_template('barang.html', barang_list=semua_barang, riwayat_list=riwayat_list, today_date=today_date)
 
 @app.route('/barang/transaksi', methods=['POST'])
 @login_required
@@ -256,6 +257,7 @@ def transaksi_barang():
     barang_id = request.form.get('barang_id')
     tipe = request.form.get('tipe')
     jumlah_input = request.form.get('jumlah')
+    tanggal_input = request.form.get('tanggal_transaksi')
 
     if barang_id and tipe and jumlah_input:
         try:
@@ -273,12 +275,25 @@ def transaksi_barang():
                     flash(f'Gagal! Stok {item.nama} tidak mencukupi (Tersisa: {item.stok} {item.satuan}).', 'danger')
                     return redirect(url_for('data_barang'))
 
+            # Olah tanggal transaksi (Khusus Admin bisa pilih tanggal, User otomatis WIB sekarang)
+            sekarang = waktu_wib()
+            if tanggal_input and session.get('role') == 'admin':
+                try:
+                    # Ambil tanggal dari form, gabungkan dengan jam/menit/detik saat ini
+                    tgl_parsed = datetime.strptime(tanggal_input, '%Y-%m-%d').date()
+                    waktu_final = datetime.combine(tgl_parsed, sekarang.time())
+                except ValueError:
+                    waktu_final = sekarang
+            else:
+                waktu_final = sekarang
+
             # Otomatis catat user_id dari user yang sedang login
             log = RiwayatTransaksi(
                 barang_id=item.id,
                 user_id=session.get('user_id'),
                 tipe=tipe,
-                jumlah=jumlah
+                jumlah=jumlah,
+                tanggal=waktu_final
             )
             db.session.add(log)
             db.session.commit()
@@ -297,6 +312,7 @@ def edit_transaksi(id):
         try:
             jumlah_baru = round(float(request.form.get('jumlah')), 2)
             tipe_baru = request.form.get('tipe')
+            tanggal_input = request.form.get('tanggal_transaksi')
 
             # 1. Rollback stok lama
             if transaksi.tipe == 'Masuk':
@@ -318,6 +334,14 @@ def edit_transaksi(id):
             # Update data transaksi
             transaksi.jumlah = jumlah_baru
             transaksi.tipe = tipe_baru
+
+            # Update tanggal jika diisi oleh admin
+            if tanggal_input:
+                try:
+                    tgl_parsed = datetime.strptime(tanggal_input, '%Y-%m-%d').date()
+                    transaksi.tanggal = datetime.combine(tgl_parsed, transaksi.tanggal.time())
+                except ValueError:
+                    pass
 
             db.session.commit()
             flash('Riwayat transaksi berhasil diperbarui!', 'success')
