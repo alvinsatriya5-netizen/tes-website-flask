@@ -158,6 +158,26 @@ def logout():
     flash('Anda berhasil keluar.', 'info')
     return redirect(url_for('login'))
 
+# ================= RUTE KELOLA PENGGUNA (KHUSUS ADMIN) =================
+@app.route('/users')
+@admin_required
+def kelola_users():
+    semua_user = User.query.order_by(User.id.asc()).all()
+    return render_template('users.html', daftar_user=semua_user)
+
+@app.route('/users/hapus/<int:id>', methods=['POST'])
+@admin_required
+def hapus_user(id):
+    user_target = User.query.get_or_404(id)
+    if user_target.id == session.get('user_id'):
+        flash('Anda tidak dapat menghapus akun Anda sendiri!', 'danger')
+        return redirect(url_for('kelola_users'))
+    
+    db.session.delete(user_target)
+    db.session.commit()
+    flash(f'Pengguna {user_target.username} berhasil dihapus!', 'info')
+    return redirect(url_for('kelola_users'))
+
 # ================= RUTE PENGUNJUNG =================
 @app.route('/', methods=['GET', 'POST'])
 @login_required

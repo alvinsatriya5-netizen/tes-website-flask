@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Kelola Pengguna - Website Flask Saya{% endblock %}
+
+{% block content %}
+<h2>Daftar Pengguna Terdaftar</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in daftar_user %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td><strong>{{ u.role.capitalize() }}</strong></td>
+            <td>
+                {% if u.id != session.get('user_id') %}
+                <form action="{{ url_for('hapus_user', id=u.id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus pengguna ini?');">
+                    <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px; border: none; cursor: pointer;">Hapus</button>
+                </form>
+                {% else %}
+                <span style="color: #777; font-size: 12px;">(Akun Anda)</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4" style="text-align: center; color: #777;">Belum ada pengguna terdaftar.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('home') }}" class="btn btn-primary" style="margin-top: 15px; display: inline-block;">Kembali ke Beranda</a>
+{% endblock %}
