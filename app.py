@@ -51,11 +51,13 @@ class Barang(db.Model):
 class RiwayatTransaksi(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     barang_id = db.Column(db.Integer, db.ForeignKey('barang.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Menghubungkan transaksi ke akun user
     tipe = db.Column(db.String(20), nullable=False)
     jumlah = db.Column(db.Float, nullable=False)
     tanggal = db.Column(db.DateTime, default=waktu_wib)
     
     barang = db.relationship('Barang', backref=db.backref('riwayat', lazy=True))
+    user = db.relationship('User', backref=db.backref('riwayat', lazy=True))  # Relasi ke tabel User
 
 # Buat database & tabel secara otomatis saat aplikasi dimulai, buat akun default jika belum ada
 with app.app_context():
@@ -271,7 +273,13 @@ def transaksi_barang():
                     flash(f'Gagal! Stok {item.nama} tidak mencukupi (Tersisa: {item.stok} {item.satuan}).', 'danger')
                     return redirect(url_for('data_barang'))
 
-            log = RiwayatTransaksi(barang_id=item.id, tipe=tipe, jumlah=jumlah)
+            # Otomatis catat user_id dari user yang sedang login
+            log = RiwayatTransaksi(
+                barang_id=item.id,
+                user_id=session.get('user_id'),
+                tipe=tipe,
+                jumlah=jumlah
+            )
             db.session.add(log)
             db.session.commit()
         except ValueError:

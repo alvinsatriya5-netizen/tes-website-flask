@@ -129,6 +129,7 @@
             <th>Nama Barang</th>
             <th>Tipe</th>
             <th>Jumlah</th>
+            <th>Petugas / User</th>
             {% if session.get('role') == 'admin' %}
             <th>Aksi</th>
             {% endif %}
@@ -147,6 +148,7 @@
                 {% endif %}
             </td>
             <td><strong>{{ '%g' % r.jumlah }}</strong> {{ r.barang.satuan if r.barang else '' }}</td>
+            <td><span style="background-color: #e9ecef; padding: 2px 8px; border-radius: 4px; font-size: 13px;">{{ r.user.username if r.user else 'Sistem' }}</span></td>
             {% if session.get('role') == 'admin' %}
             <td>
                 <a href="{{ url_for('edit_transaksi', id=r.id) }}" class="btn btn-warning" style="padding: 4px 8px; font-size: 12px;">Edit</a>
@@ -158,7 +160,7 @@
         </tr>
         {% else %}
         <tr>
-            <td colspan="{% if session.get('role') == 'admin' %}5{% else %}4{% endif %}" style="text-align: center; color: #777;">Belum ada riwayat transaksi.</td>
+            <td colspan="{% if session.get('role') == 'admin' %}6{% else %}5{% endif %}" style="text-align: center; color: #777;">Belum ada riwayat transaksi.</td>
         </tr>
         {% endfor %}
     </tbody>
