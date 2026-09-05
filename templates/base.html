@@ -6,15 +6,27 @@
     <title>{% block title %}Website Flask Saya{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        /* Override lebar kartu utama agar jauh lebih lapang */
-        .card {
-            max-width: 1100px !important; /* Diperbesar agar tabel muat lega */
-            width: 95% !important;
-            margin: 20px auto !important;
-            box-sizing: border-box;
+        /* Mengubah layout agar tidak terkesan kotak mengambang */
+        body {
+            background-color: #f4f6f9 !important;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
         }
 
-        /* Container pembungkus tabel agar fleksibel & bisa discroll horizontal di layar kecil */
+        /* Container utama dibuat lebar dan menyatu dengan layar */
+        .card {
+            max-width: 1200px !important;
+            width: 95% !important;
+            margin: 20px auto !important;
+            padding: 30px !important;
+            background: #ffffff !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Container pembungkus tabel agar fleksibel & tidak meluap keluar */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -23,23 +35,30 @@
             margin-bottom: 25px;
         }
 
-        /* Styling tabel agar tidak berdesakan */
+        /* Styling tabel agar pas dengan kontainer */
         table {
-            width: 100%;
+            width: 100% !important;
             border-collapse: collapse;
-            white-space: nowrap; /* Mencegah kolom terpotong atau teks berantakan */
+            margin-top: 10px;
         }
 
         table th, table td {
-            padding: 10px 14px;
+            padding: 12px 14px !important;
             text-align: left;
             vertical-align: middle;
+            border-bottom: 1px solid #dee2e6;
         }
 
-        /* Merapikan posisi tombol di dalam kolom tabel */
-        table td .btn, table td button {
+        table th {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+
+        /* Merapikan posisi tombol aksi di tabel */
+        table td .btn, table td button, table td a.btn {
             display: inline-block;
-            margin-right: 4px;
+            margin: 2px;
+            white-space: nowrap;
         }
     </style>
 </head>
