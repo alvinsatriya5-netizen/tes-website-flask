@@ -134,9 +134,15 @@
     </table>
 </div>
 
-<!-- Tabel Riwayat Transaksi Barang -->
-<h3 style="margin-top: 30px; margin-bottom: 10px; font-size: 18px; text-align: left;">Riwayat Transaksi Masuk / Keluar</h3>
+<!-- Header & Tombol Export Excel Riwayat Transaksi -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 35px; margin-bottom: 15px;">
+    <h3 style="margin: 0; font-size: 18px;">Riwayat Transaksi Masuk / Keluar</h3>
+    <a href="{{ url_for('export_transaksi') }}" class="btn" style="background-color: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+        <span>📊</span> Download Excel
+    </a>
+</div>
 
+<!-- Tabel Riwayat Transaksi Barang -->
 <div class="table-responsive">
     <table>
         <thead>
