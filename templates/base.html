@@ -11,6 +11,12 @@
         <nav class="navbar">
             <a href="{{ url_for('home') }}" class="nav-link {% if request.endpoint == 'home' %}active{% endif %}">Beranda</a>
             <a href="{{ url_for('data_barang') }}" class="nav-link {% if request.endpoint in ['data_barang', 'edit_barang'] %}active{% endif %}">Data Barang</a>
+            
+            <!-- Navigasi Kelola User (Khusus Admin) -->
+            {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('kelola_users') }}" class="nav-link {% if request.endpoint == 'kelola_users' %}active{% endif %}">Kelola User</a>
+            {% endif %}
+
             <a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">Tentang</a>
             
             <!-- Navigasi Login / Logout & Info User -->
