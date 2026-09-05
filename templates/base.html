@@ -5,6 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Website Flask Saya{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Override lebar kartu utama agar jauh lebih lapang */
+        .card {
+            max-width: 1100px !important; /* Diperbesar agar tabel muat lega */
+            width: 95% !important;
+            margin: 20px auto !important;
+            box-sizing: border-box;
+        }
+
+        /* Container pembungkus tabel agar fleksibel & bisa discroll horizontal di layar kecil */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 15px;
+            margin-bottom: 25px;
+        }
+
+        /* Styling tabel agar tidak berdesakan */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap; /* Mencegah kolom terpotong atau teks berantakan */
+        }
+
+        table th, table td {
+            padding: 10px 14px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        /* Merapikan posisi tombol di dalam kolom tabel */
+        table td .btn, table td button {
+            display: inline-block;
+            margin-right: 4px;
+        }
+    </style>
 </head>
 <body>
     <div class="card">

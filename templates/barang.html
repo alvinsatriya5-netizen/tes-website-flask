@@ -81,88 +81,92 @@
 <h3 style="margin-top: 30px; margin-bottom: 10px; font-size: 18px; text-align: left;">Daftar Stok Barang</h3>
 
 <!-- Tabel Data Barang -->
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nama Barang</th>
-            <th>Harga</th>
-            <th>Stok</th>
-            <th>Satuan</th>
-            {% if session.get('role') == 'admin' %}
-            <th>Aksi</th>
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for b in barang_list %}
-        <tr>
-            <td>{{ b.id }}</td>
-            <td>{{ b.nama }}</td>
-            <td>Rp {{ "{:,}".format(b.harga) }}</td>
-            <td><strong>{{ '%g' % b.stok }}</strong></td>
-            <td>{{ b.satuan }}</td>
-            {% if session.get('role') == 'admin' %}
-            <td>
-                <a href="{{ url_for('edit_barang', id=b.id) }}" class="btn btn-warning" style="padding: 4px 8px; font-size: 12px;">Edit</a>
-                <a href="{{ url_for('hapus_barang', id=b.id) }}" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="return confirm('Yakin ingin menghapus?')">Hapus</a>
-            </td>
-            {% endif %}
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="{% if session.get('role') == 'admin' %}6{% else %}5{% endif %}" style="text-align: center; color: #777;">
-                Belum ada data barang.
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nama Barang</th>
+                <th>Harga</th>
+                <th>Stok</th>
+                <th>Satuan</th>
+                {% if session.get('role') == 'admin' %}
+                <th>Aksi</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in barang_list %}
+            <tr>
+                <td>{{ b.id }}</td>
+                <td>{{ b.nama }}</td>
+                <td>Rp {{ "{:,}".format(b.harga) }}</td>
+                <td><strong>{{ '%g' % b.stok }}</strong></td>
+                <td>{{ b.satuan }}</td>
+                {% if session.get('role') == 'admin' %}
+                <td>
+                    <a href="{{ url_for('edit_barang', id=b.id) }}" class="btn btn-warning" style="padding: 4px 8px; font-size: 12px;">Edit</a>
+                    <a href="{{ url_for('hapus_barang', id=b.id) }}" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="return confirm('Yakin ingin menghapus?')">Hapus</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="{% if session.get('role') == 'admin' %}6{% else %}5{% endif %}" style="text-align: center; color: #777;">
+                    Belum ada data barang.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <!-- Tabel Riwayat Transaksi Barang -->
 <h3 style="margin-top: 30px; margin-bottom: 10px; font-size: 18px; text-align: left;">Riwayat Transaksi Masuk / Keluar</h3>
 
-<table>
-    <thead>
-        <tr>
-            <th>Waktu</th>
-            <th>Nama Barang</th>
-            <th>Tipe</th>
-            <th>Jumlah</th>
-            <th>Petugas / User</th>
-            {% if session.get('role') == 'admin' %}
-            <th>Aksi</th>
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for r in riwayat_list %}
-        <tr>
-            <td>{{ r.tanggal.strftime('%Y-%m-%d %H:%M') }}</td>
-            <td>{{ r.barang.nama if r.barang else 'Barang Dihapus' }}</td>
-            <td>
-                {% if r.tipe == 'Masuk' %}
-                    <span style="color: #28a745; font-weight: bold;">+ Masuk</span>
-                {% else %}
-                    <span style="color: #dc3545; font-weight: bold;">- Keluar</span>
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>Waktu</th>
+                <th>Nama Barang</th>
+                <th>Tipe</th>
+                <th>Jumlah</th>
+                <th>Petugas / User</th>
+                {% if session.get('role') == 'admin' %}
+                <th>Aksi</th>
                 {% endif %}
-            </td>
-            <td><strong>{{ '%g' % r.jumlah }}</strong> {{ r.barang.satuan if r.barang else '' }}</td>
-            <td><span style="background-color: #e9ecef; padding: 2px 8px; border-radius: 4px; font-size: 13px;">{{ r.user.username if r.user else 'Sistem' }}</span></td>
-            {% if session.get('role') == 'admin' %}
-            <td>
-                <a href="{{ url_for('edit_transaksi', id=r.id) }}" class="btn btn-warning" style="padding: 4px 8px; font-size: 12px;">Edit</a>
-                <form action="{{ url_for('hapus_transaksi', id=r.id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus riwayat transaksi ini? Stok barang akan dikembalikan otomatis.');">
-                    <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px; cursor: pointer; border: none;">Hapus</button>
-                </form>
-            </td>
-            {% endif %}
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="{% if session.get('role') == 'admin' %}6{% else %}5{% endif %}" style="text-align: center; color: #777;">Belum ada riwayat transaksi.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in riwayat_list %}
+            <tr>
+                <td>{{ r.tanggal.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ r.barang.nama if r.barang else 'Barang Dihapus' }}</td>
+                <td>
+                    {% if r.tipe == 'Masuk' %}
+                        <span style="color: #28a745; font-weight: bold;">+ Masuk</span>
+                    {% else %}
+                        <span style="color: #dc3545; font-weight: bold;">- Keluar</span>
+                    {% endif %}
+                </td>
+                <td><strong>{{ '%g' % r.jumlah }}</strong> {{ r.barang.satuan if r.barang else '' }}</td>
+                <td><span style="background-color: #e9ecef; padding: 2px 8px; border-radius: 4px; font-size: 13px;">{{ r.user.username if r.user else 'Sistem' }}</span></td>
+                {% if session.get('role') == 'admin' %}
+                <td>
+                    <a href="{{ url_for('edit_transaksi', id=r.id) }}" class="btn btn-warning" style="padding: 4px 8px; font-size: 12px;">Edit</a>
+                    <form action="{{ url_for('hapus_transaksi', id=r.id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus riwayat transaksi ini? Stok barang akan dikembalikan otomatis.');">
+                        <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px; cursor: pointer; border: none;">Hapus</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="{% if session.get('role') == 'admin' %}6{% else %}5{% endif %}" style="text-align: center; color: #777;">Belum ada riwayat transaksi.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
