@@ -7,27 +7,27 @@
 
 {% if session.get('role') == 'admin' %}
 <!-- Form 1: Tambah Barang Baru (Khusus Admin) -->
-<form action="{{ url_for('data_barang') }}" method="POST">
+<form action="{{ url_for('data_barang') }}" method="POST" style="margin-bottom: 20px;">
     <h3 style="margin: 0 0 10px 0; font-size: 16px;">Tambah Barang Baru</h3>
     
     <div class="form-group">
-        <label>Nama Barang</label>
-        <input type="text" name="nama" placeholder="Masukkan nama barang" required>
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Nama Barang</label>
+        <input type="text" name="nama" placeholder="Masukkan nama barang" required style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
     </div>
     
     <div class="form-group">
-        <label>Harga (Rp)</label>
-        <input type="number" name="harga" min="0" placeholder="Contoh: 50000" required>
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Harga (Rp)</label>
+        <input type="number" name="harga" min="0" placeholder="Contoh: 50000" required style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
     </div>
     
     <div class="form-group">
-        <label>Stok Awal</label>
-        <input type="number" step="any" min="0" name="stok" placeholder="Contoh: 10.5" required>
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Stok Awal</label>
+        <input type="number" step="any" min="0" name="stok" placeholder="Contoh: 10.5" required style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
     </div>
     
     <div class="form-group">
-        <label>Satuan</label>
-        <select name="satuan" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Satuan</label>
+        <select name="satuan" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%; box-sizing: border-box;">
             <option value="pcs" selected>pcs</option>
             <option value="buah">buah</option>
             <option value="lembar">lembar</option>
@@ -44,27 +44,28 @@
         </select>
     </div>
     
-    <button type="submit" class="btn btn-primary">Simpan Barang</button>
+    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Simpan Barang</button>
 </form>
 {% endif %}
 
 <!-- Form 2: Transaksi Barang Masuk / Keluar (Bisa diakses Admin & User) -->
-<form action="{{ url_for('transaksi_barang') }}" method="POST" style="margin-top: 20px; border-left: 4px solid #007bff;">
-    <h3 style="margin: 0 0 10px 0; font-size: 16px;">Transaksi Barang (Masuk / Keluar)</h3>
+<form action="{{ url_for('transaksi_barang') }}" method="POST" style="margin-top: 20px; border-left: 4px solid #007bff; padding-left: 15px;">
+    <h3 style="margin: 0 0 15px 0; font-size: 16px;">Transaksi Barang (Masuk / Keluar)</h3>
     
-    <!-- Field Input Tanggal, Bulan, dan Tahun -->
+    <!-- Input Tanggal Transaksi (Tanggal, Bulan, Tahun) -->
     <div class="form-group">
-        <label>Tanggal Transaksi</label>
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Tanggal Transaksi</label>
         <input type="date" name="tanggal_transaksi" value="{{ today_date if today_date else '' }}" required 
-               {% if session.get('role') != 'admin' %}readonly style="background-color: #e9ecef; cursor: not-allowed;"{% endif %}>
+               style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; {% if session.get('role') != 'admin' %}background-color: #e9ecef; cursor: not-allowed;{% endif %}"
+               {% if session.get('role') != 'admin' %}readonly{% endif %}>
         {% if session.get('role') != 'admin' %}
         <small style="color: #6c757d; font-size: 11px; display: block; margin-top: 4px;">*Tanggal otomatis terisi hari ini untuk User.</small>
         {% endif %}
     </div>
 
     <div class="form-group">
-        <label>Pilih Barang</label>
-        <select name="barang_id" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Pilih Barang</label>
+        <select name="barang_id" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%; box-sizing: border-box;">
             <option value="">-- Pilih Barang --</option>
             {% for b in barang_list %}
             <option value="{{ b.id }}">{{ b.nama }} (Stok: {{ '%g' % b.stok }} {{ b.satuan }})</option>
@@ -73,19 +74,19 @@
     </div>
     
     <div class="form-group">
-        <label>Tipe Transaksi</label>
-        <select name="tipe" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Tipe Transaksi</label>
+        <select name="tipe" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%; box-sizing: border-box;">
             <option value="Masuk">Barang Masuk (+ Tambah Stok)</option>
             <option value="Keluar">Barang Keluar (- Kurangi Stok)</option>
         </select>
     </div>
     
     <div class="form-group">
-        <label>Jumlah</label>
-        <input type="number" step="any" min="0.0001" name="jumlah" placeholder="Contoh: 2.5" required>
+        <label style="display: block; font-weight: bold; margin-bottom: 5px;">Jumlah</label>
+        <input type="number" step="any" min="0.0001" name="jumlah" placeholder="Contoh: 2.5" required style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
     </div>
     
-    <button type="submit" class="btn btn-primary" style="background-color: #28a745;">Proses Transaksi</button>
+    <button type="submit" class="btn btn-primary" style="background-color: #28a745; margin-top: 10px;">Proses Transaksi</button>
 </form>
 
 <h3 style="margin-top: 30px; margin-bottom: 10px; font-size: 18px; text-align: left;">Daftar Stok Barang</h3>
@@ -108,7 +109,6 @@
         <tbody>
             {% for b in barang_list %}
             <tr>
-                <!-- Penomoran otomatis berurutan (1, 2, 3...) -->
                 <td><strong>{{ loop.index }}</strong></td>
                 <td>{{ b.nama }}</td>
                 <td>Rp {{ "{:,}".format(b.harga) }}</td>
