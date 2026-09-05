@@ -12,12 +12,12 @@
     </div>
     <div class="form-group">
         <label>Harga (Rp)</label>
-        <input type="number" name="harga" value="{{ barang.harga }}" required>
+        <input type="number" name="harga" min="0" value="{{ barang.harga }}" required>
     </div>
     <div class="form-group">
         <label>Stok</label>
-        <!-- Ditambahkan step="any" dan min="0" agar mengizinkan angka desimal -->
-        <input type="number" step="any" min="0" name="stok" value="{{ barang.stok }}" required>
+        <!-- Diberikan format '%g' agar desimal seperti 25.4 tampil pas tanpa dibulatkan -->
+        <input type="number" step="any" min="0" name="stok" value="{{ '%g' % barang.stok }}" required>
     </div>
     <div class="form-group">
         <label>Satuan</label>
