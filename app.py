@@ -179,18 +179,18 @@ def hapus_user(id):
     return redirect(url_for('kelola_users'))
 
 # ================= RUTE PENGUNJUNG =================
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 @login_required
 def home():
-    if request.method == 'POST':
-        # Mengambil dari input form, atau otomatis menggunakan username yang sedang login
-        nama_input = request.form.get('nama') or session.get('username')
-        if nama_input:
-            pengunjung_baru = Pengunjung(nama=nama_input)
+    username_login = session.get('username')
+    
+    # Otomatis catat ke tabel pengunjung jika username belum ada
+    if username_login:
+        pengunjung_exist = Pengunjung.query.filter_by(nama=username_login).first()
+        if not pengunjung_exist:
+            pengunjung_baru = Pengunjung(nama=username_login)
             db.session.add(pengunjung_baru)
             db.session.commit()
-            flash(f'Pengunjung ({nama_input}) berhasil ditambahkan!', 'success')
-            return redirect(url_for('home'))
 
     semua_pengunjung = Pengunjung.query.all()
     return render_template('index.html', daftar_pengunjung=semua_pengunjung)

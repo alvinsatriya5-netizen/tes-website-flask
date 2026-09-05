@@ -10,12 +10,6 @@
     Website ini dibuat sebagai sarana <strong>Rekap Stok Barang, Keluar dan Masuk Barang</strong> untuk menertibkan ketersediaan barang yang ada.
 </p>
 
-<!-- Form Tambah Pengunjung (Otomatis terisi username pengguna yang login) -->
-<form action="/" method="POST" class="input-form">
-    <input type="text" name="nama" value="{{ session.get('username', '') }}" placeholder="Ketik nama di sini..." required autocomplete="off">
-    <button type="submit">Tambah Pengunjung</button>
-</form>
-
 <hr class="divider">
 
 <div class="list-container">
