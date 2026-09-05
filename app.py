@@ -1,7 +1,9 @@
 import os
+import io
+import openpyxl
 from datetime import datetime, timedelta, timezone
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -396,6 +398,46 @@ def hapus_barang(id):
     db.session.commit()
     flash('Barang dan riwayat transaksinya berhasil dihapus!', 'danger')
     return redirect(url_for('data_barang'))
+
+# ================= RUTE EXPORT EXCEL (RIWAYAT TRANSAKSI HASIL OPTIMASI VERCEL) =================
+@app.route('/export-transaksi')
+@login_required
+def export_transaksi():
+    # Ambil seluruh riwayat transaksi
+    riwayat_data = RiwayatTransaksi.query.order_by(RiwayatTransaksi.tanggal.desc()).all()
+
+    # Buat Workbook dan Worksheet openpyxl secara langsung (ringan & ramah Vercel)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Riwayat Transaksi"
+
+    # Header Tabel Excel
+    headers = ['Waktu / Tanggal', 'Nama Barang', 'Tipe Transaksi', 'Jumlah', 'Satuan', 'Petugas / User']
+    ws.append(headers)
+
+    # Tambahkan baris data
+    for r in riwayat_data:
+        ws.append([
+            r.tanggal.strftime('%Y-%m-%d %H:%M'),
+            r.barang.nama if r.barang else 'Barang Dihapus',
+            r.tipe,
+            r.jumlah,
+            r.barang.satuan if r.barang else '',
+            r.user.username if r.user else 'Sistem'
+        ])
+
+    # Simpan ke memory buffer
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    # Kirim file Excel sebagai unduhan
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name='Riwayat_Transaksi_Barang.xlsx'
+    )
 
 # ================= RUTE UTILITAS =================
 @app.route('/about')
