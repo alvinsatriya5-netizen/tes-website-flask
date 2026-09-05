@@ -9,18 +9,22 @@
 <!-- Form 1: Tambah Barang Baru (Khusus Admin) -->
 <form action="{{ url_for('data_barang') }}" method="POST">
     <h3 style="margin: 0 0 10px 0; font-size: 16px;">Tambah Barang Baru</h3>
+    
     <div class="form-group">
         <label>Nama Barang</label>
         <input type="text" name="nama" placeholder="Masukkan nama barang" required>
     </div>
+    
     <div class="form-group">
         <label>Harga (Rp)</label>
-        <input type="number" name="harga" placeholder="Contoh: 50000" required>
+        <input type="number" name="harga" min="0" placeholder="Contoh: 50000" required>
     </div>
+    
     <div class="form-group">
         <label>Stok Awal</label>
         <input type="number" step="any" min="0" name="stok" placeholder="Contoh: 10.5" required>
     </div>
+    
     <div class="form-group">
         <label>Satuan</label>
         <select name="satuan" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
@@ -39,21 +43,24 @@
             <option value="unit">unit</option>
         </select>
     </div>
+    
     <button type="submit" class="btn btn-primary">Simpan Barang</button>
 </form>
 
 <!-- Form 2: Transaksi Barang Masuk / Keluar (Khusus Admin) -->
 <form action="{{ url_for('transaksi_barang') }}" method="POST" style="margin-top: 20px; border-left: 4px solid #007bff;">
     <h3 style="margin: 0 0 10px 0; font-size: 16px;">Transaksi Barang (Masuk / Keluar)</h3>
+    
     <div class="form-group">
         <label>Pilih Barang</label>
         <select name="barang_id" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
             <option value="">-- Pilih Barang --</option>
             {% for b in barang_list %}
-            <option value="{{ b.id }}">{{ b.nama }} (Stok: {{ b.stok }} {{ b.satuan }})</option>
+            <option value="{{ b.id }}">{{ b.nama }} (Stok: {{ '%g' % b.stok }} {{ b.satuan }})</option>
             {% endfor %}
         </select>
     </div>
+    
     <div class="form-group">
         <label>Tipe Transaksi</label>
         <select name="tipe" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
@@ -61,10 +68,12 @@
             <option value="Keluar">Barang Keluar (- Kurangi Stok)</option>
         </select>
     </div>
+    
     <div class="form-group">
         <label>Jumlah</label>
-        <input type="number" step="any" min="0.01" name="jumlah" placeholder="Contoh: 2.5" required>
+        <input type="number" step="any" min="0.0001" name="jumlah" placeholder="Contoh: 2.5" required>
     </div>
+    
     <button type="submit" class="btn btn-primary" style="background-color: #28a745;">Proses Transaksi</button>
 </form>
 {% endif %}
@@ -91,7 +100,7 @@
             <td>{{ b.id }}</td>
             <td>{{ b.nama }}</td>
             <td>Rp {{ "{:,}".format(b.harga) }}</td>
-            <td><strong>{{ b.stok }}</strong></td>
+            <td><strong>{{ '%g' % b.stok }}</strong></td>
             <td>{{ b.satuan }}</td>
             {% if session.get('role') == 'admin' %}
             <td>
@@ -126,7 +135,7 @@
         {% for r in riwayat_list %}
         <tr>
             <td>{{ r.tanggal.strftime('%Y-%m-%d %H:%M') }}</td>
-            <td>{{ r.barang.nama }}</td>
+            <td>{{ r.barang.nama if r.barang else 'Barang Dihapus' }}</td>
             <td>
                 {% if r.tipe == 'Masuk' %}
                     <span style="color: #28a745; font-weight: bold;">+ Masuk</span>
@@ -134,7 +143,7 @@
                     <span style="color: #dc3545; font-weight: bold;">- Keluar</span>
                 {% endif %}
             </td>
-            <td><strong>{{ r.jumlah }}</strong> {{ r.barang.satuan }}</td>
+            <td><strong>{{ '%g' % r.jumlah }}</strong> {{ r.barang.satuan if r.barang else '' }}</td>
         </tr>
         {% else %}
         <tr>
