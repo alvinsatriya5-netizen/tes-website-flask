@@ -183,12 +183,13 @@ def hapus_user(id):
 @login_required
 def home():
     if request.method == 'POST':
-        nama_input = request.form.get('nama')
+        # Mengambil dari input form, atau otomatis menggunakan username yang sedang login
+        nama_input = request.form.get('nama') or session.get('username')
         if nama_input:
             pengunjung_baru = Pengunjung(nama=nama_input)
             db.session.add(pengunjung_baru)
             db.session.commit()
-            flash('Pengunjung berhasil ditambahkan!', 'success')
+            flash(f'Pengunjung ({nama_input}) berhasil ditambahkan!', 'success')
             return redirect(url_for('home'))
 
     semua_pengunjung = Pengunjung.query.all()
