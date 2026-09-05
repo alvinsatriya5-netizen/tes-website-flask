@@ -5,7 +5,8 @@
 {% block content %}
 <h2>Manajemen Data Barang</h2>
 
-<!-- Form 1: Tambah Barang Baru -->
+{% if session.get('role') == 'admin' %}
+<!-- Form 1: Tambah Barang Baru (Khusus Admin) -->
 <form action="{{ url_for('data_barang') }}" method="POST">
     <h3 style="margin: 0 0 10px 0; font-size: 16px;">Tambah Barang Baru</h3>
     <div class="form-group">
@@ -18,10 +19,8 @@
     </div>
     <div class="form-group">
         <label>Stok Awal</label>
-        <!-- Ditambahkan step="any" dan min="0" agar bisa diisi angka desimal -->
         <input type="number" step="any" min="0" name="stok" placeholder="Contoh: 10.5" required>
     </div>
-    <!-- Input Satuan Baru -->
     <div class="form-group">
         <label>Satuan</label>
         <select name="satuan" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
@@ -43,12 +42,12 @@
     <button type="submit" class="btn btn-primary">Simpan Barang</button>
 </form>
 
-<!-- Form 2: Transaksi Barang Masuk / Keluar (Ubah Stok Otomatis) -->
+<!-- Form 2: Transaksi Barang Masuk / Keluar (Khusus Admin) -->
 <form action="{{ url_for('transaksi_barang') }}" method="POST" style="margin-top: 20px; border-left: 4px solid #007bff;">
     <h3 style="margin: 0 0 10px 0; font-size: 16px;">Transaksi Barang (Masuk / Keluar)</h3>
     <div class="form-group">
         <label>Pilih Barang</label>
-        <select name="barang_id" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white;">
+        <select name="barang_id" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
             <option value="">-- Pilih Barang --</option>
             {% for b in barang_list %}
             <option value="{{ b.id }}">{{ b.nama }} (Stok: {{ b.stok }} {{ b.satuan }})</option>
@@ -57,18 +56,18 @@
     </div>
     <div class="form-group">
         <label>Tipe Transaksi</label>
-        <select name="tipe" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white;">
+        <select name="tipe" required style="padding: 9px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 14px; outline: none; background: white; width: 100%;">
             <option value="Masuk">Barang Masuk (+ Tambah Stok)</option>
             <option value="Keluar">Barang Keluar (- Kurangi Stok)</option>
         </select>
     </div>
     <div class="form-group">
         <label>Jumlah</label>
-        <!-- Ditambahkan step="any" dan min="0.01" agar transaksi desimal diizinkan -->
         <input type="number" step="any" min="0.01" name="jumlah" placeholder="Contoh: 2.5" required>
     </div>
     <button type="submit" class="btn btn-primary" style="background-color: #28a745;">Proses Transaksi</button>
 </form>
+{% endif %}
 
 <h3 style="margin-top: 30px; margin-bottom: 10px; font-size: 18px; text-align: left;">Daftar Stok Barang</h3>
 
@@ -81,7 +80,9 @@
             <th>Harga</th>
             <th>Stok</th>
             <th>Satuan</th>
+            {% if session.get('role') == 'admin' %}
             <th>Aksi</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -92,14 +93,18 @@
             <td>Rp {{ "{:,}".format(b.harga) }}</td>
             <td><strong>{{ b.stok }}</strong></td>
             <td>{{ b.satuan }}</td>
+            {% if session.get('role') == 'admin' %}
             <td>
                 <a href="{{ url_for('edit_barang', id=b.id) }}" class="btn btn-warning" style="padding: 4px 8px; font-size: 12px;">Edit</a>
                 <a href="{{ url_for('hapus_barang', id=b.id) }}" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="return confirm('Yakin ingin menghapus?')">Hapus</a>
             </td>
+            {% endif %}
         </tr>
         {% else %}
         <tr>
-            <td colspan="6" style="text-align: center; color: #777;">Belum ada data barang.</td>
+            <td colspan="{% if session.get('role') == 'admin' %}6{% else %}5{% endif %}" style="text-align: center; color: #777;">
+                Belum ada data barang.
+            </td>
         </tr>
         {% endfor %}
     </tbody>

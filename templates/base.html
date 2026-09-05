@@ -12,6 +12,16 @@
             <a href="{{ url_for('home') }}" class="nav-link {% if request.endpoint == 'home' %}active{% endif %}">Beranda</a>
             <a href="{{ url_for('data_barang') }}" class="nav-link {% if request.endpoint in ['data_barang', 'edit_barang'] %}active{% endif %}">Data Barang</a>
             <a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">Tentang</a>
+            
+            <!-- Navigasi Login / Logout & Info User -->
+            {% if session.get('user_id') %}
+                <span class="user-info" style="margin-left: 10px; font-weight: 600; font-size: 14px;">
+                    👤 {{ session.get('username') }} ({{ session.get('role')|capitalize }})
+                </span>
+                <a href="{{ url_for('logout') }}" class="nav-link" style="color: #dc3545;">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="nav-link {% if request.endpoint == 'login' %}active{% endif %}">Login</a>
+            {% endif %}
         </nav>
 
         <!-- Ditambahkan ?v=1.1 untuk membuang cache gambar lama -->
