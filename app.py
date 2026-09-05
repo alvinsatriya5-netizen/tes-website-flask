@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
@@ -25,7 +25,7 @@ db = SQLAlchemy(app)
 
 # ================= HELPER WAKTU WIB (GMT+7) =================
 def waktu_wib():
-    return datetime.utcnow() + timedelta(hours=7)
+    return datetime.now(timezone.utc) + timedelta(hours=7)
 
 # ================= DATABASE MODELS =================
 class User(db.Model):
@@ -178,16 +178,22 @@ def data_barang():
             return redirect(url_for('data_barang'))
 
         nama = request.form.get('nama')
-        harga = request.form.get('harga')
-        stok = request.form.get('stok')
+        harga_input = request.form.get('harga')
+        stok_input = request.form.get('stok')
         satuan = request.form.get('satuan', 'pcs')
 
-        if nama and harga and stok and satuan:
-            barang_baru = Barang(nama=nama, harga=int(harga), stok=float(stok), satuan=satuan)
-            db.session.add(barang_baru)
-            db.session.commit()
-            flash('Barang berhasil ditambahkan!', 'success')
-            return redirect(url_for('data_barang'))
+        if nama and harga_input and stok_input and satuan:
+            try:
+                harga = int(harga_input)
+                stok = round(float(stok_input), 2)
+                
+                barang_baru = Barang(nama=nama, harga=harga, stok=stok, satuan=satuan)
+                db.session.add(barang_baru)
+                db.session.commit()
+                flash('Barang berhasil ditambahkan!', 'success')
+                return redirect(url_for('data_barang'))
+            except ValueError:
+                flash('Format harga atau stok tidak valid!', 'danger')
 
     semua_barang = Barang.query.all()
     riwayat_list = RiwayatTransaksi.query.order_by(RiwayatTransaksi.tanggal.desc()).all()
@@ -202,23 +208,26 @@ def transaksi_barang():
     jumlah_input = request.form.get('jumlah')
 
     if barang_id and tipe and jumlah_input:
-        jumlah = float(jumlah_input)
-        item = Barang.query.get_or_404(int(barang_id))
+        try:
+            jumlah = round(float(jumlah_input), 2)
+            item = Barang.query.get_or_404(int(barang_id))
 
-        if tipe == 'Masuk':
-            item.stok += jumlah
-            flash(f'Stok {item.nama} berhasil ditambah {jumlah} {item.satuan}!', 'success')
-        elif tipe == 'Keluar':
-            if item.stok >= jumlah:
-                item.stok -= jumlah
-                flash(f'Stok {item.nama} berhasil dikurangi {jumlah} {item.satuan}!', 'info')
-            else:
-                flash(f'Gagal! Stok {item.nama} tidak mencukupi (Tersisa: {item.stok} {item.satuan}).', 'danger')
-                return redirect(url_for('data_barang'))
+            if tipe == 'Masuk':
+                item.stok = round(item.stok + jumlah, 2)
+                flash(f'Stok {item.nama} berhasil ditambah {jumlah} {item.satuan}!', 'success')
+            elif tipe == 'Keluar':
+                if item.stok >= jumlah:
+                    item.stok = round(item.stok - jumlah, 2)
+                    flash(f'Stok {item.nama} berhasil dikurangi {jumlah} {item.satuan}!', 'info')
+                else:
+                    flash(f'Gagal! Stok {item.nama} tidak mencukupi (Tersisa: {item.stok} {item.satuan}).', 'danger')
+                    return redirect(url_for('data_barang'))
 
-        log = RiwayatTransaksi(barang_id=item.id, tipe=tipe, jumlah=jumlah)
-        db.session.add(log)
-        db.session.commit()
+            log = RiwayatTransaksi(barang_id=item.id, tipe=tipe, jumlah=jumlah)
+            db.session.add(log)
+            db.session.commit()
+        except ValueError:
+            flash('Jumlah transaksi harus berupa angka yang valid!', 'danger')
 
     return redirect(url_for('data_barang'))
 
@@ -227,13 +236,16 @@ def transaksi_barang():
 def edit_barang(id):
     item = Barang.query.get_or_404(id)
     if request.method == 'POST':
-        item.nama = request.form.get('nama')
-        item.harga = int(request.form.get('harga'))
-        item.stok = float(request.form.get('stok'))
-        item.satuan = request.form.get('satuan')
-        db.session.commit()
-        flash('Data barang berhasil diperbarui!', 'info')
-        return redirect(url_for('data_barang'))
+        try:
+            item.nama = request.form.get('nama')
+            item.harga = int(request.form.get('harga'))
+            item.stok = round(float(request.form.get('stok')), 2)
+            item.satuan = request.form.get('satuan')
+            db.session.commit()
+            flash('Data barang berhasil diperbarui!', 'info')
+            return redirect(url_for('data_barang'))
+        except ValueError:
+            flash('Input angka tidak valid!', 'danger')
 
     return render_template('edit_barang.html', barang=item)
 
