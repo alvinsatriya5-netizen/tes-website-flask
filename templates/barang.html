@@ -129,7 +129,9 @@
             <th>Nama Barang</th>
             <th>Tipe</th>
             <th>Jumlah</th>
+            {% if session.get('role') == 'admin' %}
             <th>Aksi</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -145,16 +147,18 @@
                 {% endif %}
             </td>
             <td><strong>{{ '%g' % r.jumlah }}</strong> {{ r.barang.satuan if r.barang else '' }}</td>
+            {% if session.get('role') == 'admin' %}
             <td>
                 <a href="{{ url_for('edit_transaksi', id=r.id) }}" class="btn btn-warning" style="padding: 4px 8px; font-size: 12px;">Edit</a>
                 <form action="{{ url_for('hapus_transaksi', id=r.id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus riwayat transaksi ini? Stok barang akan dikembalikan otomatis.');">
                     <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px; cursor: pointer; border: none;">Hapus</button>
                 </form>
             </td>
+            {% endif %}
         </tr>
         {% else %}
         <tr>
-            <td colspan="5" style="text-align: center; color: #777;">Belum ada riwayat transaksi.</td>
+            <td colspan="{% if session.get('role') == 'admin' %}5{% else %}4{% endif %}" style="text-align: center; color: #777;">Belum ada riwayat transaksi.</td>
         </tr>
         {% endfor %}
     </tbody>
