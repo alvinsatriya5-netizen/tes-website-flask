@@ -103,7 +103,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# ================= RUTE AUTENTIKASI =================
+# ================= RUTE AUTENTIKASI & REGISTRASI =================
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'user_id' in session:
@@ -124,6 +124,33 @@ def login():
             flash('Username atau password salah!', 'danger')
 
     return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if 'user_id' in session:
+        return redirect(url_for('home'))
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        # Cek apakah username sudah dipakai
+        user_exist = User.query.filter_by(username=username).first()
+        if user_exist:
+            flash('Username sudah terdaftar! Silakan gunakan username lain.', 'danger')
+            return redirect(url_for('register'))
+
+        if username and password:
+            # Hash password dan set role ke 'user' secara otomatis
+            hashed_password = generate_password_hash(password)
+            user_baru = User(username=username, password=hashed_password, role='user')
+            db.session.add(user_baru)
+            db.session.commit()
+
+            flash('Pendaftaran berhasil! Silakan login dengan akun Anda.', 'success')
+            return redirect(url_for('login'))
+
+    return render_template('register.html')
 
 @app.route('/logout')
 def logout():
