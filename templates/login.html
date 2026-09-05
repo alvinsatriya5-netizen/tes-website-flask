@@ -3,27 +3,31 @@
 {% block title %}Login - Website Flask Saya{% endblock %}
 
 {% block content %}
-<div style="max-width: 400px; margin: 40px auto; padding: 25px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-    <h2 style="text-align: center; margin-bottom: 20px;">Silakan Login</h2>
+<div style="max-width: 400px; margin: 30px auto; padding: 25px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-align: left;">
+    <h2 style="text-align: center; margin-bottom: 20px; font-size: 22px;">Silakan Login</h2>
     
     <form action="{{ url_for('login') }}" method="POST">
         <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Username</label>
-            <input type="text" name="username" placeholder="Masukkan username" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px;">Username</label>
+            <input type="text" name="username" placeholder="Masukkan username" required style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none;">
         </div>
         
         <div class="form-group" style="margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Password</label>
-            <input type="password" name="password" placeholder="Masukkan password" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px;">Password</label>
+            <input type="password" name="password" placeholder="Masukkan password" required style="width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none;">
         </div>
         
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 16px;">Login</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 15px; font-weight: 600; border-radius: 6px; cursor: pointer;">Login</button>
     </form>
 
-    <div style="margin-top: 20px; font-size: 13px; color: #666; background: #f8f9fa; padding: 10px; border-radius: 5px;">
-        <strong>Akun Default:</strong><br>
-        • Admin: <code>admin</code> / <code>admin123</code><br>
-        • User: <code>user</code> / <code>user123</code>
+    <div style="margin-top: 20px; font-size: 13px; color: #495057; background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef; text-align: center;">
+        <strong style="display: block; margin-bottom: 6px; color: #212529;">Akun Default untuk Uji Coba:</strong>
+        <div style="display: flex; justify-content: space-around; margin-top: 4px;">
+            <span>👑 <strong>Admin:</strong> <code>admin</code> / <code>admin123</code></span>
+        </div>
+        <div style="display: flex; justify-content: space-around; margin-top: 4px;">
+            <span>👤 <strong>User:</strong> <code>user</code> / <code>user123</code></span>
+        </div>
     </div>
 </div>
 {% endblock %}
