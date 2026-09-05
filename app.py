@@ -20,7 +20,7 @@ if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 
 # Gunakan Vercel Postgres jika ada, jika tidak ada (lokal) fallback ke SQLite
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///' + os.path.join(app.root_path, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -61,29 +61,38 @@ class RiwayatTransaksi(db.Model):
     barang = db.relationship('Barang', backref=db.backref('riwayat', lazy=True))
     user = db.relationship('User', backref=db.backref('riwayat', lazy=True))  # Relasi ke tabel User
 
-# Buat database & tabel secara otomatis saat aplikasi dimulai, buat akun default jika belum ada
-with app.app_context():
-    try:
-        db.create_all()
-        # Membuat akun admin default
-        if not User.query.filter_by(username='admin').first():
-            admin_user = User(
-                username='admin',
-                password=generate_password_hash('admin123'),
-                role='admin'
-            )
-            db.session.add(admin_user)
-        # Membuat akun user biasa default
-        if not User.query.filter_by(username='user').first():
-            normal_user = User(
-                username='user',
-                password=generate_password_hash('user123'),
-                role='user'
-            )
-            db.session.add(normal_user)
-        db.session.commit()
-    except Exception as e:
-        print("Log DB Create Error:", e)
+# ================= INISIALISASI DATABASE LAZY-LOADING =================
+db_initialized = False
+
+def init_db():
+    global db_initialized
+    if not db_initialized:
+        try:
+            db.create_all()
+            # Membuat akun admin default
+            if not User.query.filter_by(username='admin').first():
+                admin_user = User(
+                    username='admin',
+                    password=generate_password_hash('admin123'),
+                    role='admin'
+                )
+                db.session.add(admin_user)
+            # Membuat akun user biasa default
+            if not User.query.filter_by(username='user').first():
+                normal_user = User(
+                    username='user',
+                    password=generate_password_hash('user123'),
+                    role='user'
+                )
+                db.session.add(normal_user)
+            db.session.commit()
+            db_initialized = True
+        except Exception as e:
+            print("Log DB Create Error:", e)
+
+@app.before_request
+def ensure_db_initialized():
+    init_db()
 
 # ================= DECORATOR HAK AKSES =================
 def login_required(f):
