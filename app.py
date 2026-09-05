@@ -201,7 +201,7 @@ def data_barang():
     return render_template('barang.html', barang_list=semua_barang, riwayat_list=riwayat_list)
 
 @app.route('/barang/transaksi', methods=['POST'])
-@admin_required
+@login_required
 def transaksi_barang():
     barang_id = request.form.get('barang_id')
     tipe = request.form.get('tipe')
@@ -229,6 +229,64 @@ def transaksi_barang():
         except ValueError:
             flash('Jumlah transaksi harus berupa angka yang valid!', 'danger')
 
+    return redirect(url_for('data_barang'))
+
+@app.route('/transaksi/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_transaksi(id):
+    transaksi = RiwayatTransaksi.query.get_or_404(id)
+    item = Barang.query.get_or_404(transaksi.barang_id)
+
+    if request.method == 'POST':
+        try:
+            jumlah_baru = round(float(request.form.get('jumlah')), 2)
+            tipe_baru = request.form.get('tipe')
+
+            # 1. Rollback stok lama
+            if transaksi.tipe == 'Masuk':
+                stok_sementara = item.stok - transaksi.jumlah
+            else:
+                stok_sementara = item.stok + transaksi.jumlah
+
+            # 2. Cek kecukupan stok jika tipe baru adalah 'Keluar'
+            if tipe_baru == 'Keluar' and stok_sementara < jumlah_baru:
+                flash(f'Gagal! Stok {item.nama} tidak mencukupi untuk penyesuaian ini.', 'danger')
+                return redirect(url_for('data_barang'))
+
+            # 3. Hitung stok akhir berdasarkan tipe baru
+            if tipe_baru == 'Masuk':
+                item.stok = round(stok_sementara + jumlah_baru, 2)
+            else:
+                item.stok = round(stok_sementara - jumlah_baru, 2)
+
+            # Update data transaksi
+            transaksi.jumlah = jumlah_baru
+            transaksi.tipe = tipe_baru
+
+            db.session.commit()
+            flash('Riwayat transaksi berhasil diperbarui!', 'success')
+            return redirect(url_for('data_barang'))
+
+        except ValueError:
+            flash('Input jumlah transaksi tidak valid!', 'danger')
+
+    return render_template('edit_transaksi.html', transaksi=transaksi)
+
+@app.route('/transaksi/hapus/<int:id>', methods=['POST'])
+@login_required
+def hapus_transaksi(id):
+    transaksi = RiwayatTransaksi.query.get_or_404(id)
+    item = Barang.query.get_or_404(transaksi.barang_id)
+
+    # Revert/Rollback stok barang saat transaksi dihapus
+    if transaksi.tipe == 'Masuk':
+        item.stok = round(item.stok - transaksi.jumlah, 2)
+    else:
+        item.stok = round(item.stok + transaksi.jumlah, 2)
+
+    db.session.delete(transaksi)
+    db.session.commit()
+    flash('Riwayat transaksi berhasil dihapus dan stok telah disesuaikan!', 'info')
     return redirect(url_for('data_barang'))
 
 @app.route('/barang/edit/<int:id>', methods=['GET', 'POST'])

@@ -46,8 +46,9 @@
     
     <button type="submit" class="btn btn-primary">Simpan Barang</button>
 </form>
+{% endif %}
 
-<!-- Form 2: Transaksi Barang Masuk / Keluar (Khusus Admin) -->
+<!-- Form 2: Transaksi Barang Masuk / Keluar (Bisa diakses Admin & User) -->
 <form action="{{ url_for('transaksi_barang') }}" method="POST" style="margin-top: 20px; border-left: 4px solid #007bff;">
     <h3 style="margin: 0 0 10px 0; font-size: 16px;">Transaksi Barang (Masuk / Keluar)</h3>
     
@@ -76,7 +77,6 @@
     
     <button type="submit" class="btn btn-primary" style="background-color: #28a745;">Proses Transaksi</button>
 </form>
-{% endif %}
 
 <h3 style="margin-top: 30px; margin-bottom: 10px; font-size: 18px; text-align: left;">Daftar Stok Barang</h3>
 
@@ -129,6 +129,7 @@
             <th>Nama Barang</th>
             <th>Tipe</th>
             <th>Jumlah</th>
+            <th>Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -144,10 +145,16 @@
                 {% endif %}
             </td>
             <td><strong>{{ '%g' % r.jumlah }}</strong> {{ r.barang.satuan if r.barang else '' }}</td>
+            <td>
+                <a href="{{ url_for('edit_transaksi', id=r.id) }}" class="btn btn-warning" style="padding: 4px 8px; font-size: 12px;">Edit</a>
+                <form action="{{ url_for('hapus_transaksi', id=r.id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus riwayat transaksi ini? Stok barang akan dikembalikan otomatis.');">
+                    <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px; cursor: pointer; border: none;">Hapus</button>
+                </form>
+            </td>
         </tr>
         {% else %}
         <tr>
-            <td colspan="4" style="text-align: center; color: #777;">Belum ada riwayat transaksi.</td>
+            <td colspan="5" style="text-align: center; color: #777;">Belum ada riwayat transaksi.</td>
         </tr>
         {% endfor %}
     </tbody>

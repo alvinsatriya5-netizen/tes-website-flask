@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Transaksi - Website Flask Saya{% endblock %}
+
+{% block content %}
+<h2>Edit Transaksi Barang</h2>
+
+<form action="{{ url_for('edit_transaksi', id=transaksi.id) }}" method="POST">
+    <div class="form-group">
+        <label>Nama Barang</label>
+        <input type="text" value="{{ transaksi.barang.nama }}" disabled style="background-color: #e9ecef;">
+    </div>
+    <div class="form-group">
+        <label>Tipe Transaksi</label>
+        <select name="tipe" required class="form-control">
+            <option value="Masuk" {% if transaksi.tipe == 'Masuk' %}selected{% endif %}>Barang Masuk (+ Tambah Stok)</option>
+            <option value="Keluar" {% if transaksi.tipe == 'Keluar' %}selected{% endif %}>Barang Keluar (- Kurangi Stok)</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Jumlah ({{ transaksi.barang.satuan }})</label>
+        <input type="number" step="any" min="0.01" name="jumlah" value="{{ '%g' % transaksi.jumlah }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+    <a href="{{ url_for('data_barang') }}" class="btn btn-secondary">Batal</a>
+</form>
+{% endblock %}
