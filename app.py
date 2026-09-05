@@ -259,7 +259,7 @@ def transaksi_barang():
     return redirect(url_for('data_barang'))
 
 @app.route('/transaksi/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def edit_transaksi(id):
     transaksi = RiwayatTransaksi.query.get_or_404(id)
     item = Barang.query.get_or_404(transaksi.barang_id)
@@ -300,7 +300,7 @@ def edit_transaksi(id):
     return render_template('edit_transaksi.html', transaksi=transaksi)
 
 @app.route('/transaksi/hapus/<int:id>', methods=['POST'])
-@login_required
+@admin_required
 def hapus_transaksi(id):
     transaksi = RiwayatTransaksi.query.get_or_404(id)
     item = Barang.query.get_or_404(transaksi.barang_id)
